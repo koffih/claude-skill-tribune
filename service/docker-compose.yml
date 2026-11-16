@@ -1,0 +1,28 @@
+# Tribune with its own PostgreSQL. To use an existing database (Supabase or
+# any PostgreSQL 14+), drop the db service and set DATABASE_URL in .env.
+services:
+  tribune:
+    build: .
+    restart: unless-stopped
+    env_file: ${TRIBUNE_ENV_FILE:-.env}
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://tribune:${POSTGRES_PASSWORD}@db:5432/tribune}
+    ports:
+      - "127.0.0.1:${TRIBUNE_PORT:-8790}:8790"
+    depends_on:
+      db: { condition: service_healthy }
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tribune
+      POSTGRES_DB: tribune
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - tribune-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tribune"]
+      interval: 5s
+      retries: 20
+volumes:
+  tribune-db:

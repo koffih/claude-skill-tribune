@@ -1,0 +1,12 @@
+node_modules/
+dist/
+mail-out/
+test-results/
+playwright-report/
+.env
+.env.*
+!.env.example
+service/.env.ci
+# Local working evidence and owner-specific checks stay out of the public repo.
+.proof/
+scripts/test-skill-discovery.sh
