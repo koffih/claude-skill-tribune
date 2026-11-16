@@ -6,7 +6,7 @@ A [Claude Code](https://claude.com/claude-code) skill that ships, installs and o
 - The team merges duplicates (reversibly), answers, changes statuses with a message that notifies the author, voters and followers, publishes a changelog linked to the ideas, and adds votes on behalf of customers from support tickets with their words and the ticket link.
 - The backlog ranks ideas by weighted votes × impact × confidence ÷ effort, and shows people, accounts and monthly revenue (counted once per account) next to it.
 - One line of script embeds it in any site; signed-in users are recognised through a short token signed by the site's server, so nobody creates a second account. Visitors can sign in with an emailed link.
-- French and English, light and dark, phone width, keyboard accessible. Export and erasure of personal data (GDPR, Quebec Law 25).
+- French, English and Spanish, light and dark, phone width, keyboard accessible. Export and erasure of personal data (GDPR, Quebec Law 25).
 
 Node 22, PostgreSQL 14+ (its own container, or a `tribune` schema in an existing database or Supabase), Docker Compose. MIT.
 

@@ -1,6 +1,6 @@
 /* Tribune widget: one line on any site.
  *   <script src="https://HOST/widget.js" data-site="SLUG" async></script>
- * Options (data-*): position=bottom-right|bottom-left|none, label="Vos idées", lang=fr|en, token=<signed JWT>
+ * Options (data-*): position=bottom-right|bottom-left|none, label="Vos idées", lang=fr|en|es, token=<signed JWT>
  * JS API: Tribune.identify(jwt) · Tribune.open("roadmap"|"changelog"|"p/12"|"") · Tribune.close() · Tribune.logout()
  * The panel is an iframe on the Tribune origin: no CSS leaks either way, and the session is a
  * bearer token inside the frame, so third-party cookie blocking does not matter. */
@@ -12,7 +12,8 @@
   var origin = new URL(src).origin;
   var lang = s.getAttribute('data-lang') || (document.documentElement.lang || 'fr').slice(0, 2);
   var position = s.getAttribute('data-position') || 'bottom-right';
-  var label = s.getAttribute('data-label') || (lang === 'en' ? 'Feedback' : 'Vos idées');
+  if (['fr', 'en', 'es'].indexOf(lang) < 0) lang = 'en';
+  var label = s.getAttribute('data-label') || ({ en: 'Feedback', es: 'Tus ideas' }[lang] || 'Vos idées');
   var pending = s.getAttribute('data-token') || null, ready = false, frame, panel, btn, lastFocus;
   var queued = (window.Tribune && window.Tribune.q) || [];
 

@@ -14,7 +14,7 @@ Three pieces: the widget line, a token signed by the site's **server** for the s
 | `data-token` | none | signed token for the current user (section 2) |
 | `data-position` | `bottom-right` | `bottom-left`, or `none` to open it from your own button |
 | `data-label` | "Vos idées" / "Feedback" | launcher text and panel title |
-| `data-lang` | page `lang` | `fr` or `en` |
+| `data-lang` | page `lang` | `fr`, `en` or `es` (anything else shows English) |
 
 ```js
 Tribune.identify(token)   // after a sign-in that happens without reload
@@ -36,7 +36,7 @@ Claims:
 | `sub` | `sub` or `email` | your stable user id |
 | `email` | | trusted as verified (your site vouches for it), used for notifications |
 | `name`, `avatar` | | display |
-| `locale` | | `fr` or `en`, language of the panel and of emails |
+| `locale` | | `fr`, `en` or `es`, language of the panel and of emails |
 | `segment` | | e.g. `paying`, `free`, `internal`: weight comes from the site's `segment_weights` |
 | `weight` | | explicit vote weight, overrides the segment |
 | `role` | | `moderator` or `admin` for your staff (disable with `allow_role_claim: false`) |

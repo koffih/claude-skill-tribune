@@ -64,15 +64,16 @@ function Failed({ ctx, error, retry }) {
   return <div class="card" role="alert"><p class="error">{error.status === 404 ? t.not_found : t[error.code] || t.error}</p>
     <button class="btn ghost sm" onClick={retry}>{t.retry}</button></div>;
 }
-addEventListener('unhandledrejection', (e) => { console.error(e.reason); toast(document.documentElement.lang === 'en' ? 'Something went wrong.' : 'Une erreur est survenue.'); });
+addEventListener('unhandledrejection', (e) => { console.error(e.reason); toast({ en: 'Something went wrong.', es: 'Se produjo un error.' }[document.documentElement.lang] || 'Une erreur est survenue.'); });
 function toast(m) {
   const el = document.createElement('div');
   el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = m;
   document.body.appendChild(el); setTimeout(() => el.remove(), 3500);
 }
 
-const fmtDate = (d, loc) => new Date(d).toLocaleDateString(loc === 'fr' ? 'fr-CA' : 'en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
-const L = (obj, loc) => (obj && (obj[loc] || obj.fr || obj.en)) || '';
+const fmtDate = (d, loc) => new Date(d).toLocaleDateString({ fr: 'fr-CA', en: 'en-CA', es: 'es' }[loc] || 'fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+// Labels set per site may lack a language: Spanish falls back to English, the others to French.
+const L = (obj, loc) => (obj && (obj[loc] || (loc === 'es' ? obj.en || obj.fr : obj.fr || obj.en))) || '';
 
 // ---------- app ----------
 
@@ -117,8 +118,8 @@ function App() {
   if (err) return <div class="page"><p class="error">{err.code === 'site_not_found' ? 'Site introuvable / Site not found' : String(err.message)}</p></div>;
   if (!cfg) return <div class="page"><div class="skeleton" /></div>;
 
-  const loc = params.get('lang') === 'en' || params.get('lang') === 'fr' ? params.get('lang')
-    : cfg.me?.locale || cfg.site.default_locale || 'fr';
+  const asked = params.get('lang');
+  const loc = ['fr', 'en', 'es'].includes(asked) ? asked : cfg.me?.locale || cfg.site.default_locale || 'fr';
   const t = dict[loc];
   document.documentElement.lang = loc;
   document.title = `${t.ideas} · ${cfg.site.name}`;
@@ -596,7 +597,7 @@ function Backlog({ ctx }) {
   const { t } = ctx;
   const [all, setAll] = useState(false);
   const { data: d, error, reload } = useLoad(() => api('GET', `/backlog${all ? '?all=1' : ''}`), [all]);
-  const money = useMemo(() => new Intl.NumberFormat(ctx.loc === 'fr' ? 'fr-CA' : 'en-CA', { maximumFractionDigits: 0 }), [ctx.loc]);
+  const money = useMemo(() => new Intl.NumberFormat({ fr: 'fr-CA', en: 'en-CA', es: 'es' }[ctx.loc] || 'fr-CA', { style: 'currency', currency: 'CAD', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }), [ctx.loc]);
   if (error) return <Failed ctx={ctx} error={error} retry={reload} />;
   if (!d) return <div class="skeleton" />;
   return (
@@ -609,7 +610,7 @@ function Backlog({ ctx }) {
         <tbody>{d.posts.map((p, i) => <tr>
           <td class="muted">{i + 1}</td><td><A to={`p/${p.number}`}>{p.title}</A></td><td><StatusPill ctx={ctx} k={p.status} /></td>
           <td class="num strong">{p.priority ?? '—'}</td><td class="num">{p.weighted_votes}</td><td class="num">{p.people}</td>
-          <td class="num">{p.companies}</td><td class="num">{p.mrr ? `${money.format(p.mrr)} $` : '—'}</td>
+          <td class="num">{p.companies}</td><td class="num">{p.mrr ? money.format(p.mrr) : '—'}</td>
           <td class="num muted">{p.impact ?? '·'} · {p.confidence ?? '·'} · {p.effort ?? '·'}</td></tr>)}</tbody>
       </table></div>
     </>

@@ -99,7 +99,7 @@ api.post('/sites/:site/auth/magic', async (c) => {
   const site = c.get('site');
   if (site.config.magic_link === false) throw new HttpError(403, 'magic_link_disabled');
   const b = await body(c, z.object({ email: z.string().email().max(320), name: z.string().max(120).optional(),
-    return_to: z.string().max(500).optional(), locale: z.enum(['fr', 'en']).optional() }));
+    return_to: z.string().max(500).optional(), locale: z.enum(['fr', 'en', 'es']).optional() }));
   limit(`magic-ip:${ip(c)}`, 10, 15 * 60_000);
   limit(`magic-mail:${site.id}:${b.email.toLowerCase()}`, 3, 15 * 60_000);
   const t = await createMagicLink(site, b.email, b.name, b.return_to);
@@ -379,7 +379,7 @@ api.post('/sites/:site/me/notifications/read', async (c) => {
 });
 api.patch('/sites/:site/me', async (c) => {
   const user = needUser(c);
-  const b = await body(c, z.object({ email_opt_out: z.boolean().optional(), locale: z.enum(['fr', 'en']).optional(), name: z.string().trim().min(1).max(120).optional() }));
+  const b = await body(c, z.object({ email_opt_out: z.boolean().optional(), locale: z.enum(['fr', 'en', 'es']).optional(), name: z.string().trim().min(1).max(120).optional() }));
   await sql`update tribune.app_user set email_opt_out = coalesce(${b.email_opt_out ?? null}, email_opt_out),
     locale = coalesce(${b.locale ?? null}, locale), name = coalesce(${b.name ?? null}, name) where id = ${user.id}`;
   return c.json({ ok: true });
@@ -459,9 +459,9 @@ api.patch('/sites/:site/posts/:number', async (c) => {
     if (b.notify) {
       const audience = await audienceOf(p.id, user.id, tx);
       const byLocale = await tx<{ id: string; locale: string | null }[]>`select id, locale from tribune.app_user where id in ${sql(audience.length ? audience : ['00000000-0000-0000-0000-000000000000'])}`;
-      for (const loc of ['fr', 'en'] as const) {
+      for (const loc of ['fr', 'en', 'es'] as const) {
         const ids = byLocale.filter((u) => (u.locale ?? site.default_locale) === loc).map((u) => u.id);
-        await notify(site.id, ids, p.id, 'status_changed', { title: b.title ?? p.title, number: p.number, status: status.label[loc] ?? status.key, status_key: status.key, message: b.message ?? null }, tx);
+        await notify(site.id, ids, p.id, 'status_changed', { title: b.title ?? p.title, number: p.number, status: status.label[loc] ?? status.label.en ?? status.key, status_key: status.key, message: b.message ?? null }, tx);
       }
     }
     await emitWebhook(site, 'post.status_changed', { number: p.number, title: p.title, from: p.status_key, to: status.key, message: b.message ?? null }, tx);
@@ -680,7 +680,7 @@ api.put('/sites/:site/companies/:external_id', async (c) => {
 
 // ---------- settings (admin) ----------
 
-const label = z.object({ fr: z.string().min(1).max(80), en: z.string().min(1).max(80) });
+const label = z.object({ fr: z.string().min(1).max(80), en: z.string().min(1).max(80), es: z.string().min(1).max(80).optional() });
 
 api.get('/sites/:site/settings', async (c) => {
   const site = c.get('site');
@@ -695,7 +695,7 @@ api.patch('/sites/:site/settings', async (c) => {
   const site = c.get('site');
   needAdmin(c);
   const b = await body(c, z.object({ name: z.string().min(1).max(120).optional(), domains: z.array(z.string().max(200)).max(20).optional(),
-    default_locale: z.enum(['fr', 'en']).optional(), config: z.record(z.unknown()).optional() }));
+    default_locale: z.enum(['fr', 'en', 'es']).optional(), config: z.record(z.unknown()).optional() }));
   await sql`update tribune.site set name = coalesce(${b.name ?? null}, name), domains = coalesce(${b.domains ?? null}, domains),
     default_locale = coalesce(${b.default_locale ?? null}, default_locale),
     config = config || ${sql.json((b.config ?? {}) as never)} where id = ${site.id}`;
@@ -715,7 +715,7 @@ api.post('/sites/:site/settings/rotate', async (c) => {
 api.put('/sites/:site/boards/:board', async (c) => {
   const site = c.get('site');
   needAdmin(c);
-  const b = await body(c, z.object({ name: label, description: z.object({ fr: z.string().max(500), en: z.string().max(500) }).partial().default({}),
+  const b = await body(c, z.object({ name: label, description: z.object({ fr: z.string().max(500), en: z.string().max(500), es: z.string().max(500) }).partial().default({}),
     visibility: z.enum(['public', 'private', 'segment']).default('public'), segments: z.array(z.string().max(60)).default([]),
     require_approval: z.boolean().default(false), position: z.number().int().default(0) }));
   const slug = z.string().regex(/^[a-z0-9][a-z0-9-]{0,40}$/).parse(c.req.param('board'));

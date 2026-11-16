@@ -18,9 +18,10 @@ export class HttpError extends Error {
   }
 }
 
-export type Locale = 'fr' | 'en';
+export type Locale = 'fr' | 'en' | 'es';
+export const LOCALES = ['fr', 'en', 'es'] as const;
 export function pickLocale(v: unknown, fallback: Locale): Locale {
-  return v === 'fr' || v === 'en' ? v : fallback;
+  return v === 'fr' || v === 'en' || v === 'es' ? v : fallback;
 }
 
 // Very small in-memory limiter for unauthenticated endpoints (magic links,

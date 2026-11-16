@@ -18,7 +18,7 @@ try {
   else if (cmd === 'create-site') {
     const [slug, name] = args;
     if (!slug || !name) throw new Error('usage: create-site <slug> "<name>"');
-    const r = await createSite(slug, name, { locale: flag('locale') as 'fr' | 'en' | undefined, domains: flag('domains')?.split(',').filter(Boolean) });
+    const r = await createSite(slug, name, { locale: flag('locale') as 'fr' | 'en' | 'es' | undefined, domains: flag('domains')?.split(',').filter(Boolean) });
     console.log(JSON.stringify({ ...r, portal: `${cfg.publicUrl}/s/${slug}/`, widget: `<script src="${cfg.publicUrl}/widget.js" data-site="${slug}" async></script>` }, null, 2));
     console.error('\nStore jwt_secret and api_key in the host site secrets now: they are not shown again.');
   } else if (cmd === 'admin-link') {

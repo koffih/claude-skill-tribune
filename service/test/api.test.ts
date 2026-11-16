@@ -210,3 +210,14 @@ t('a notification that cannot be sent is retried with backoff, then given up wit
   assert.equal(row.email_skip, 'send_failed');
   assert.equal(row.emailed_at, null);
 });
+
+t('Spanish: a user identified in Spanish gets status names and notifications in Spanish', async () => {
+  const es = await login(S.slug, S.jwt_secret, { sub: 'es1', email: 'lucia@example.com', name: 'Lucía', locale: 'es' });
+  const n = await post(es, 'Clases de salsa por niveles');
+  await call('PATCH', `/sites/${S.slug}/posts/${n}`, { token: mod, body: { status: 'planned', message: 'Para enero' } });
+  const note = (await call('GET', `/sites/${S.slug}/me/notifications`, { token: es })).json.notifications.find((x: any) => x.type === 'status_changed' && x.payload.number === n);
+  assert.equal(note.payload.status, 'Prevista');
+  const cfgr = await call('GET', `/sites/${S.slug}/config`, { token: es });
+  assert.equal(cfgr.json.me.locale, 'es');
+  assert.equal(cfgr.json.statuses.find((x: any) => x.key === 'planned').label.es, 'Prevista');
+});

@@ -77,6 +77,10 @@ test('English and phone width', async ({ browser }) => {
   await expect(p.getByRole('button', { name: 'Tendance' })).toBeVisible();
   expect(await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
   await p.screenshot({ path: `${SHOTS}/11-portail-fr-mobile.png`, fullPage: true });
+  await p.goto(`${T}/s/${SITE}/?lang=es`);
+  await expect(p.getByRole('button', { name: 'Tendencia' })).toBeVisible();
+  await expect(p.getByText('Propón y vota las próximas funciones.')).toBeVisible();
+  await p.screenshot({ path: `${SHOTS}/12-portal-es-mobile.png`, fullPage: true });
   await p.goto(`${H}/?as=sam`);
   await p.getByRole('button', { name: 'Feedback' }).click();
   const w = p.frameLocator('iframe[title="Feedback"]');

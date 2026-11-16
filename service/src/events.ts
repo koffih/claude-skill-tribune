@@ -112,6 +112,19 @@ const T = {
     magicBody: 'Click to sign in. The link works once and expires in 20 minutes.',
     magicButton: 'Sign in',
   },
+  es: {
+    status_changed: (p: any) => `«${p.title}» ahora está: ${p.status}`,
+    team_reply: (p: any) => `El equipo respondió en «${p.title}»`,
+    merged: (p: any) => `«${p.title}» se unió a «${p.into_title}», tu voto la acompaña`,
+    shipped: (p: any) => `Ya está disponible: «${p.title}»`,
+    new_post: (p: any) => `Nueva idea: «${p.title}»`,
+    digest: (n: number) => `${n} novedades sobre las ideas que sigues`,
+    open: 'Ver', unsub: 'No recibir más estos correos',
+    why: 'Recibes este mensaje porque propusiste, votaste o seguiste esta idea.',
+    magicSubject: (s: string) => `Tu enlace para entrar en ${s}`,
+    magicBody: 'Haz clic para entrar. El enlace sirve una sola vez y caduca en 20 minutos.',
+    magicButton: 'Entrar',
+  },
 };
 
 function layout(site: string, lines: { text: string; url: string; message?: string }[], footer: string, unsub: string, L: typeof T.fr) {
@@ -128,7 +141,7 @@ function layout(site: string, lines: { text: string; url: string; message?: stri
 
 export const postUrl = (site: string, n: number) => `${cfg.publicUrl}/s/${site}/p/${n}`;
 
-export async function sendMagicLink(site: Site, email: string, t: string, locale: 'fr' | 'en') {
+export async function sendMagicLink(site: Site, email: string, t: string, locale: 'fr' | 'en' | 'es') {
   const L = T[locale];
   const url = `${cfg.publicUrl}/s/${site.slug}/auth?token=${encodeURIComponent(t)}`;
   if (cfg.mailMode === 'log') console.log(`[mail] magic link for ${email}: ${url}`);
@@ -167,7 +180,7 @@ export async function flushEmails(): Promise<{ sent: number; skipped: number; fa
         where id in (select id from tribune.notification where user_id = ${user_id} and ${due} for update skip locked)
         returning id, type, payload, mail_attempts`;
       if (!claimed.length) continue;
-      const [u] = await sql<{ email: string; locale: 'fr' | 'en' | null; slug: string; site_name: string; default_locale: 'fr' | 'en'; mail_from: string | null }[]>`
+      const [u] = await sql<{ email: string; locale: 'fr' | 'en' | 'es' | null; slug: string; site_name: string; default_locale: 'fr' | 'en' | 'es'; mail_from: string | null }[]>`
         select u.email, u.locale, s.slug, s.name as site_name, s.default_locale, s.config->>'mail_from' as mail_from
         from tribune.app_user u join tribune.site s on s.id = u.site_id where u.id = ${user_id}`;
       if (!u) throw new Error('user row missing');

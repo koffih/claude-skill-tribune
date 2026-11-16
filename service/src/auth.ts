@@ -5,7 +5,7 @@ import { cfg } from './config.js';
 import { HttpError, sha256, token } from './util.js';
 
 export type Site = {
-  id: string; slug: string; name: string; domains: string[]; default_locale: 'fr' | 'en';
+  id: string; slug: string; name: string; domains: string[]; default_locale: 'fr' | 'en' | 'es';
   jwt_secret: string; api_key_hash: string; config: SiteConfig;
 };
 export type SiteConfig = {
@@ -25,7 +25,7 @@ export type SiteConfig = {
 export type User = {
   id: string; site_id: string; external_id: string | null; email: string | null; name: string;
   avatar_url: string | null; segment: string | null; weight: string | null;
-  role: 'user' | 'moderator' | 'admin'; company_id: string | null; locale: 'fr' | 'en' | null;
+  role: 'user' | 'moderator' | 'admin'; company_id: string | null; locale: 'fr' | 'en' | 'es' | null;
   banned: boolean; email_verified: boolean; email_opt_out: boolean;
 };
 export const isTeam = (u: User | null | undefined) => !!u && (u.role === 'moderator' || u.role === 'admin');
@@ -72,7 +72,7 @@ const claimsSchema = z.object({
   segment: z.string().max(60).optional(),
   weight: z.number().min(0).max(1000).optional(),
   role: z.enum(['user', 'moderator', 'admin']).optional(),
-  locale: z.enum(['fr', 'en']).optional(),
+  locale: z.enum(['fr', 'en', 'es']).optional(),
   company: z.object({
     id: z.union([z.string(), z.number()]).transform(String),
     name: z.string().max(200),

@@ -46,7 +46,7 @@ No code was copied. Fider, Quackback, Astuto, openheard and LogChimp are AGPL (L
 ## Deliberately left out
 
 - **Anonymous voting.** openheard's client-minted ids are trivially stuffed; Featurebase notes anonymous votes cannot be told about progress. Voting needs an identity (host token or email link). Revisit only with a keyed network hash and a fail-closed limit, as openheard's help-centre votes do.
-- **Per-post language detection** (Fider): useful at scale, not needed with `simple` + unaccent + trigram for FR/EN.
+- **Per-post language detection** (Fider): useful at scale, not needed with `simple` + unaccent + trigram for French, English and Spanish.
 - **Composite tenant foreign keys** (Fider): every query in Tribune filters by `site_id` and tests prove isolation; worth adding if third parties ever write SQL against the schema.
 
 ## Next steps, with their design
