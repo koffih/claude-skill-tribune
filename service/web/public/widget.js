@@ -37,8 +37,21 @@
     document.body.appendChild(panel);
   }
   function post(msg) { if (frame && frame.contentWindow) frame.contentWindow.postMessage(msg, origin); }
+  // Fit the panel to the visible area, not the layout viewport: on a page wider than the
+  // phone screen (an overflowing table), right:0 would put half the panel and its close
+  // button off-screen.
+  function fit() {
+    var vv = window.visualViewport; if (!panel || !vv) return;
+    var w = Math.min(440, Math.floor(vv.width));
+    panel.style.width = w + 'px'; panel.style.maxWidth = 'none'; panel.style.right = 'auto';
+    panel.style.left = Math.round(vv.offsetLeft + (position === 'bottom-left' ? 0 : vv.width - w)) + 'px';
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fit);
+    window.visualViewport.addEventListener('scroll', fit);
+  }
   function open(view) {
-    build(); lastFocus = document.activeElement;
+    build(); fit(); lastFocus = document.activeElement;
     panel.classList.add('trb-open'); panel.setAttribute('aria-hidden', 'false');
     if (view !== undefined) { if (ready) post({ type: 'tribune:open', view: view }); else panel._view = view; }
     setTimeout(function () { frame.focus(); }, 50);
